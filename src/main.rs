@@ -11,6 +11,7 @@ use std::io::prelude::*;
 enum Token {
     Number { value: String, line: i32, column: usize },
     Symbol { value: String, line: i32, column: usize },
+    Whitespace { value: String, line: i32, column: usize },
 }
 
 fn lex_number(text: &mut String) -> Option<Token> {
@@ -27,7 +28,7 @@ fn lex_number(text: &mut String) -> Option<Token> {
 
 fn lex_symbol(text: &mut String) -> Option<Token> {
     lazy_static! {
-        static ref RE: Regex = Regex::new(r"^:?[a-zA-Z_]+[\w-]*[!?_]?:?").unwrap();
+        static ref RE: Regex = Regex::new(r"^[a-zA-Z_]+[\w-]*[!?_]?").unwrap();
     }
     if let Some(mat) = RE.find(text.clone().as_bytes()) {
         let sub: String = text.drain(..mat.end()).collect();
@@ -37,11 +38,23 @@ fn lex_symbol(text: &mut String) -> Option<Token> {
     }
 }
 
+fn lex_whitespace(text: &mut String) -> Option<Token> {
+    lazy_static! {
+        static ref RE: Regex = Regex::new(r"^\s+").unwrap();
+    }
+    if let Some(mat) = RE.find(text.clone().as_bytes()) {
+        let sub: String = text.drain(..mat.end()).collect();
+        Some(Token::Whitespace { value: sub, line: 1, column: 1 })
+    } else {
+        None
+    }
+}
+
 fn lex(mut text: &mut String) -> Vec<Token> {
     let mut tokens = Vec::new();
     while !text.is_empty() {
         let mut found = false;
-        for lexer in [lex_number, lex_symbol].iter() {
+        for lexer in [lex_number, lex_symbol, lex_whitespace].iter() {
             if let Some(token) = lexer(&mut text) {
                 tokens.push(token);
                 found = true;
