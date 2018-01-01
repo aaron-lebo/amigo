@@ -1,0 +1,11 @@
+[package]
+name = "amigo"
+description = "a scheme inspired language"
+version = "0.1.0"
+authors = ["Aaron Lebo <aaron.matthew.lebo@gmail.com>"]
+license = "ISC"
+repository = "https://github.com/aaron-lebo/amigo"
+
+[dependencies]
+lazy_static = "1.0"
+regex = "0.2"
