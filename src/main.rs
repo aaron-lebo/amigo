@@ -3,9 +3,13 @@ extern crate lazy_static;
 
 extern crate regex;
 
-use regex::bytes::Regex;
+use regex::bytes::{Regex, Match};
 use std::io;
 use std::io::prelude::*;
+
+fn substr(text: &mut String, mat: Match) -> String {
+    text.drain(..mat.end()).collect()
+}
 
 #[derive(Debug)]
 enum Token {
@@ -19,8 +23,7 @@ fn lex_number(text: &mut String) -> Option<Token> {
         static ref RE: Regex = Regex::new(r"^-?\d+(\.\d)?").unwrap();
     }
     if let Some(mat) = RE.find(text.clone().as_bytes()) {
-        let sub: String = text.drain(..mat.end()).collect();
-        Some(Token::Number { value: sub, line: 1, column: 1 })
+        Some(Token::Number { value: substr(text, mat), line: 1, column: 1 })
     } else {
         None
     }
@@ -31,8 +34,7 @@ fn lex_symbol(text: &mut String) -> Option<Token> {
         static ref RE: Regex = Regex::new(r"^[a-zA-Z_]+[\w-]*[!?_]?").unwrap();
     }
     if let Some(mat) = RE.find(text.clone().as_bytes()) {
-        let sub: String = text.drain(..mat.end()).collect();
-        Some(Token::Symbol { value: sub, line: 1, column: 1 })
+        Some(Token::Symbol { value: substr(text, mat), line: 1, column: 1 })
     } else {
         None
     }
@@ -43,19 +45,18 @@ fn lex_whitespace(text: &mut String) -> Option<Token> {
         static ref RE: Regex = Regex::new(r"^\s+").unwrap();
     }
     if let Some(mat) = RE.find(text.clone().as_bytes()) {
-        let sub: String = text.drain(..mat.end()).collect();
-        Some(Token::Whitespace { value: sub, line: 1, column: 1 })
+        Some(Token::Whitespace { value: substr(text, mat), line: 1, column: 1 })
     } else {
         None
     }
 }
 
-fn lex(mut text: &mut String) -> Vec<Token> {
+fn lex(text: &mut String) -> Vec<Token> {
     let mut tokens = Vec::new();
     while !text.is_empty() {
         let mut found = false;
         for lexer in [lex_number, lex_symbol, lex_whitespace].iter() {
-            if let Some(token) = lexer(&mut text) {
+            if let Some(token) = lexer(text) {
                 tokens.push(token);
                 found = true;
                 break;
