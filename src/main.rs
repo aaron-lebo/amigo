@@ -75,7 +75,7 @@ fn main() {
     let stdin = io::stdin();
     let mut stdout = io::stdout();
 
-    print!("amigo 0.1\n> ");
+    print!("amigo 0.2\n> ");
     stdout.flush().unwrap();
 
     let mut lexer = Lexer::new();
