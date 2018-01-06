@@ -8,7 +8,7 @@ dependencies = [
 
 [[package]]
 name = "amigo"
-version = "0.1.0"
+version = "0.2.1"
 dependencies = [
  "lazy_static 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "regex 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)",

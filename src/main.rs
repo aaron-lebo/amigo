@@ -31,7 +31,9 @@ impl Lexer {
     fn lex_number(&mut self) -> Option<Token> {
         lazy_static! { static ref RE: Regex = Regex::new(r"^-?\d+(\.\d)?").unwrap(); }
         if let Some(mat) = RE.find(self.buf.clone().as_bytes()) {
-            Some(Token::Number { val: self.substr(mat), line: 1, col: self.pos, len: mat.end() })
+            let (col, len) = (self.pos, mat.end());
+            self.pos += len as u32;
+            Some(Token::Number { val: self.substr(mat), line: 1, col: col, len: len })
         } else {
             None
         }
@@ -40,7 +42,9 @@ impl Lexer {
     fn lex_symbol(&mut self) -> Option<Token> {
         lazy_static! { static ref RE: Regex = Regex::new(r"^[a-zA-Z_]+[\w-]*[!?_]?").unwrap(); }
         if let Some(mat) = RE.find(self.buf.clone().as_bytes()) {
-            Some(Token::Symbol { val: self.substr(mat), line: 1, col: self.pos, len: mat.end() })
+            let (col, len) = (self.pos, mat.end());
+            self.pos += len as u32;
+            Some(Token::Symbol { val: self.substr(mat), line: 1, col: col, len: len })
         } else {
             None
         }
@@ -49,7 +53,9 @@ impl Lexer {
     fn lex_whitespace(&mut self) -> Option<Token> {
         lazy_static! { static ref RE: Regex = Regex::new(r"\s+").unwrap(); }
         if let Some(mat) = RE.find(self.buf.clone().as_bytes()) {
-            Some(Token::Whitespace { val: self.substr(mat), line: 1, col: self.pos, len: mat.end() })
+            let (col, len) = (self.pos, mat.end());
+            self.pos += len as u32;
+            Some(Token::Whitespace { val: self.substr(mat), line: 1, col: col, len: len })
         } else {
             None
         }
@@ -61,7 +67,7 @@ impl Iterator for Lexer {
 
     fn next(&mut self) -> Option<Token> {
         let mut token: Option<Token> = None;
-        for lex in &[Lexer::lex_symbol, Lexer::lex_number, Lexer::lex_whitespace] {
+        for lex in &[Self::lex_symbol, Self::lex_number, Self::lex_whitespace] {
             token = lex(self);
             if token.is_some() {
                 break;
@@ -84,6 +90,7 @@ fn main() {
         for token in &mut lexer {
             println!("{:?}", token);
         }
+        lexer.pos = 1;
         print!("> ");
         stdout.flush().unwrap();
     }
