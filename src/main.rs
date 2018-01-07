@@ -87,7 +87,7 @@ impl Iterator for Lexer {
 
     fn next(&mut self) -> Option<Token> {
         let mut token: Option<Token> = None;
-        for lex in &[Self::lex_symbol, Self::lex_number, Self::lex_left_paren, Self:: lex_right_paren, Self::lex_whitespace] {
+        for lex in &[Self::lex_symbol, Self::lex_number, Self::lex_left_paren, Self::lex_right_paren, Self::lex_whitespace] {
             token = lex(self);
             if token.is_some() {
                 break;
